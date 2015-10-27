@@ -3,6 +3,13 @@
 #include <vector>
 using namespace std;
 
+// Using pre-increment style
+uint32_t& moduloIncrement(uint32_t& portals_used, uint32_t incr = 1){
+    portals_used += incr;
+    portals_used = portals_used % 1000000007;
+    return portals_used;
+}
+
 class Node{
     private:
         unsigned int num_;
@@ -25,14 +32,20 @@ class Node{
         pair<Node*, uint32_t> goLeft(){
             pair <Node*, uint32_t> ret;
 
+            // I don't expect To ever hit this case
             if(use_left_portal_){
                 ret = make_pair<Node*, uint32_t>(left, 1);
                 use_left_portal_ = false;
             }
             else{
-                ret = make_pair<Node*, uint32_t>(left, getRoundTripTime());
+                // Cost to get back in the current node
+                uint32_t traverseRight = getRoundTripTime();
+                // At this point we can take left. Add cost to take left (i.e., 1 traversal)
+                moduloIncrement(traverseRight);
+                ret = make_pair<Node*, uint32_t>(left, traverseRight);
                 use_left_portal_ = false;
             }
+            return ret;
         }
 
         Node * traverse(){
@@ -54,11 +67,21 @@ class Node{
         }
         
     private:
-        // brief: Calculated the time it takes to get back to the current node
+        // brief: Calculate the time it takes to get back to the current node
         uint32_t getRoundTripTime(){
             // If round trip time not cached, calculate it
             if (!round_trip_calculated_){
-                round_trip_time_ = 1;    
+                // Cost to go right
+                round_trip_time_ = 1;
+                Node* next_node = right;
+                while(next_node->nodeNum() != this->nodeNum()){
+                    auto p = next_node->goLeft();
+                    // Get the node on the left
+                    next_node = p.first;
+                    // Add the cost of taking the left node
+                    moduloIncrement(round_trip_time_, p.second);
+                }
+
                 round_trip_calculated_ = true;
             }
 
@@ -94,12 +117,6 @@ void setRightLinks(istream& in, vector<Node*> nodes){
 
 }
 
-uint32_t& moduloIncrement(uint32_t& portals_used){
-    ++portals_used;
-    portals_used = portals_used % 1000000007;
-    return portals_used;
-}
-
 uint32_t solve(vector<Node*> nodes){
     uint32_t portals_used = 0; 
     Node * curr_node = nodes[0];
@@ -110,6 +127,15 @@ uint32_t solve(vector<Node*> nodes){
     }
 
     return portals_used;
+}
+
+uint32_t solve_optimized(vector<Node*> nodes){
+    uint32_t fitbit = 0;
+    for (int i=0; i < nodes.size()-1 ; i++){
+        moduloIncrement(fitbit, nodes[i]->goLeft().second);
+    }
+
+    return fitbit;
 }
 int main(){
     // Number of Rooms
@@ -126,9 +152,9 @@ int main(){
 
     setRightLinks(cin, nodes);
 
-    uint32_t a = solve(nodes);
-    cout << "Method 1: " << a << endl;
-    cout << "Method 2: " << ((nodes[n]->goLeft()).second)+1 << endl;
+    cout << "Method 1: " << solve(nodes) << endl;
+    cout << "Method 2: " << solve_optimized(nodes) << endl;
+
 
     for (vector<Node*>::iterator it = nodes.begin(); it != nodes.end(); it++){
         delete *it;
