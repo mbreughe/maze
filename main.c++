@@ -7,15 +7,34 @@ class Node{
     private:
         unsigned int num_;
         bool use_left_portal_;
+        bool round_trip_calculated_;
+        uint32_t round_trip_time_;
     public:
         Node* left;
         Node* right;
     public:
         Node(int n):
             num_(n),
-            use_left_portal_ (false)
+            use_left_portal_ (false),
+            round_trip_calculated_(false)
             {;}
-        
+
+        // brief: Calculate how many portal traversals it takes to go left
+        // Return: (left node, port traversal time)
+        // Note: Sets use_left_portal to false, since we will use the left portal
+        pair<Node*, uint32_t> goLeft(){
+            pair <Node*, uint32_t> ret;
+
+            if(use_left_portal_){
+                ret = make_pair<Node*, uint32_t>(left, 1);
+                use_left_portal_ = false;
+            }
+            else{
+                ret = make_pair<Node*, uint32_t>(left, getRoundTripTime());
+                use_left_portal_ = false;
+            }
+        }
+
         Node * traverse(){
             Node * return_node;
             if(use_left_portal_){
@@ -33,6 +52,19 @@ class Node{
         unsigned int nodeNum(){
             return num_;
         }
+        
+    private:
+        // brief: Calculated the time it takes to get back to the current node
+        uint32_t getRoundTripTime(){
+            // If round trip time not cached, calculate it
+            if (!round_trip_calculated_){
+                round_trip_time_ = 1;    
+                round_trip_calculated_ = true;
+            }
+
+            return round_trip_time_;
+        }
+
 
 };
 
@@ -95,7 +127,8 @@ int main(){
     setRightLinks(cin, nodes);
 
     uint32_t a = solve(nodes);
-    cout << a << endl;
+    cout << "Method 1: " << a << endl;
+    cout << "Method 2: " << ((nodes[n]->goLeft()).second)+1 << endl;
 
     for (vector<Node*>::iterator it = nodes.begin(); it != nodes.end(); it++){
         delete *it;
