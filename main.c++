@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdint>
 #include <vector>
+#include <utility>
 using namespace std;
 
 // Using pre-increment style
@@ -34,7 +35,8 @@ class Node{
 
             // I don't expect To ever hit this case
             if(use_left_portal_){
-                ret = make_pair<Node*, uint32_t>(left, 1);
+                ret.first = left;
+                ret.second = 1;
                 use_left_portal_ = false;
             }
             else{
@@ -42,7 +44,8 @@ class Node{
                 uint32_t traverseRight = getRoundTripTime();
                 // At this point we can take left. Add cost to take left (i.e., 1 traversal)
                 moduloIncrement(traverseRight);
-                ret = make_pair<Node*, uint32_t>(left, traverseRight);
+                ret.first = left;
+                ret.second = traverseRight;
                 use_left_portal_ = false;
             }
             return ret;
