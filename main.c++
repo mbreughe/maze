@@ -12,12 +12,22 @@ class Node{
         Node* right;
     public:
         Node(int n):
-            num_(n){;}
+            num_(n),
+            use_left_portal_ (false)
+            {;}
         
         Node * traverse(){
-            cout << "Toggle between left and right" << endl;
-            cout << "Going to " << left->nodeNum() << endl;
-            return left;
+            Node * return_node;
+            if(use_left_portal_){
+                return_node = left;
+            }else{
+                return_node = right;
+            }
+
+            // Toggle
+            use_left_portal_ = ! use_left_portal_;
+
+            return return_node;
         }
 
         unsigned int nodeNum(){
@@ -43,9 +53,19 @@ void setLeftLinks(vector<Node*> nodes){
     }while (next->nodeNum() != 1);
 }
 
-void setRightLinks(istream& in){
-    (void) in;
-    cout << " Set up right links" << endl;
+void setRightLinks(istream& in, vector<Node*> nodes){
+    for (size_t i=0; i != nodes.size() - 1; ++i){
+        unsigned int node_num;
+        in >> node_num;
+        nodes[i]->right = nodes[node_num-1];
+    }
+
+}
+
+uint32_t& moduloIncrement(uint32_t& portals_used){
+    ++portals_used;
+    portals_used = portals_used % 1000000007;
+    return portals_used;
 }
 
 uint32_t solve(vector<Node*> nodes){
@@ -53,9 +73,9 @@ uint32_t solve(vector<Node*> nodes){
     Node * curr_node = nodes[0];
     while(curr_node->nodeNum() != nodes.size()){
         curr_node = curr_node->traverse();
-        ++portals_used;
+        // perform modulo increment in case there are a large number of traversals
+        moduloIncrement(portals_used);
     }
-    cout << "Do the modulo" << endl;
 
     return portals_used;
 }
@@ -64,7 +84,7 @@ int main(){
     unsigned int n;
     cin >> n;
 
-    vector<Node*> nodes(n);
+    vector<Node*> nodes(n+1);
 
     for(int i=0; i < n+1; i++){
         nodes[i] = new Node(i+1);
@@ -72,7 +92,7 @@ int main(){
     
     setLeftLinks(nodes);
 
-    setRightLinks(cin);
+    setRightLinks(cin, nodes);
 
     uint32_t a = solve(nodes);
     cout << a << endl;
