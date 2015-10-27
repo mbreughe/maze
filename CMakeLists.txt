@@ -5,6 +5,6 @@ cmake_minimum_required(VERSION 2.6)
 project(maze)
 
 #Sends the -std=c11 flag to the gcc compiler
-#add_definitions(-std=c++11)
+add_definitions(-std=c++0x)
 
 add_executable(maze main.c++)
