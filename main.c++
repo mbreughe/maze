@@ -152,8 +152,7 @@ int main(){
 
     setRightLinks(cin, nodes);
 
-    cout << "Method 1: " << solve(nodes) << endl;
-    cout << "Method 2: " << solve_optimized(nodes) << endl;
+    cout << solve_optimized(nodes) << endl;
 
 
     for (vector<Node*>::iterator it = nodes.begin(); it != nodes.end(); it++){
